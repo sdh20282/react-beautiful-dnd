@@ -1,0 +1,1 @@
+# MementoAI_Front_Assignment
