@@ -29,25 +29,20 @@ const Context = () => {
         return;
       }
 
-      const [
-        from,
-        fromIndex,
-        to,
-        toIndex
-      ] = [
-          `item-${result.source.droppableId.slice(-1)}`,
-          result.source.index,
-          `item-${result.destination.droppableId.slice(-1)}`,
-          result.destination.index
-        ];
+      const [from, fromIndex, to, toIndex] = [
+        `item-${result.source.droppableId.slice(-1)}`,
+        result.source.index,
+        `item-${result.destination.droppableId.slice(-1)}`,
+        result.destination.index
+      ];
 
-      const { arr, item } = removeItem(items[from], fromIndex);
-      const target = insertItem(items[to], item, toIndex);
+      const { removedList, item } = removeItem(items[from], fromIndex);
+      const { insertedList } = insertItem(items[to], item, toIndex);
 
       const newItems = {
         ...items,
-        [from]: arr,
-        [to]: target,
+        [from]: removedList,
+        [to]: insertedList,
       };
 
       setItems(newItems);

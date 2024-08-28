@@ -12,7 +12,7 @@ export const removeItem = (list, index) => {
   const [removed] = result.splice(index, 1);
 
   return {
-    arr: result,
+    removedList: result,
     item: removed,
   }
 }
@@ -21,5 +21,7 @@ export const insertItem = (list, item, index) => {
   const result = Array.from(list);
   result.splice(index, 0, item);
 
-  return result;
+  return {
+    insertedList: result,
+  };
 }
