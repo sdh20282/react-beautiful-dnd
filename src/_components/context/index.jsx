@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 
 import { List, Item } from "@components";
-import { getItems, removeItem, insertItem } from "@utils";
+import { getItems, reorder } from "@utils";
 import { ITEM_COUNT } from "@data";
 
 import * as s from './styles';
@@ -36,14 +36,7 @@ const Context = () => {
         result.destination.index
       ];
 
-      const { removedList, item } = removeItem(items[from], fromIndex);
-      const { insertedList } = insertItem(items[to], item, toIndex);
-
-      const newItems = {
-        ...items,
-        [from]: removedList,
-        [to]: insertedList,
-      };
+      const newItems = reorder(items, from, fromIndex, to, toIndex);
 
       setItems(newItems);
     },

@@ -7,21 +7,16 @@ export const getItems = (count) => {
   return items;
 };
 
-export const removeItem = (list, index) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(index, 1);
+export const reorder = (items, from, fromIndex, to, toIndex) => {
+  const result = {};
 
-  return {
-    removedList: result,
-    item: removed,
+  for (const item of Object.keys(items)) {
+    result[item] = [...items[item]];
   }
-}
 
-export const insertItem = (list, item, index) => {
-  const result = Array.from(list);
-  result.splice(index, 0, item);
+  const [removed] = result[from].splice(fromIndex, 1);
 
-  return {
-    insertedList: result,
-  };
-}
+  result[to].splice(toIndex, 0, removed);
+
+  return result;
+};

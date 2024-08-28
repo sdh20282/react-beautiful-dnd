@@ -1,7 +1,6 @@
 export {
   getItems,
-  removeItem,
-  insertItem
+  reorder
 } from './item';
 
 export {
