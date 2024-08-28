@@ -3,24 +3,24 @@ import { useState, useCallback } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 
 import { List, Item } from "@components";
+import { getItems, removeItem, insertItem } from "@utils";
+
+import * as s from './styles';
 
 const Context = () => {
-  const [columns, setCoulmns] = useState(1);
+  const [columns, setCoulmns] = useState(4);
+  const [items, setItems] = useState(Array.from({ length: columns }, (_, i) => i).reduce((acc, _, idx) => {
+    const current = {
+      ...acc,
+      [`item-${idx + 1}`]: idx === 0 ? getItems(10) : [],
+    }
 
-  const getItems = (count) =>
-    Array.from({ length: count }, (_, k) => k).map((k) => ({
-      id: `item-${k}`,
-      content: `item ${k}`,
-    }));
+    return current;
+  }, {}));
 
-  const [items, setItems] = useState(getItems(10));
-
-  const reorder = (list, startIndex, endIndex) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-    return result;
-  };
+  const onDragUpdate = (result) => {
+    // console.log(result);
+  }
 
   const onDragEnd = useCallback(
     (result) => {
@@ -28,11 +28,26 @@ const Context = () => {
         return;
       }
 
-      const newItems = reorder(
-        items,
-        result.source.index,
-        result.destination.index
-      );
+      const [
+        from,
+        fromIndex,
+        to,
+        toIndex
+      ] = [
+          `item-${result.source.droppableId.slice(-1)}`,
+          result.source.index,
+          `item-${result.destination.droppableId.slice(-1)}`,
+          result.destination.index
+        ];
+
+      const { arr, item } = removeItem(items[from], fromIndex);
+      const target = insertItem(items[to], item, toIndex);
+
+      const newItems = {
+        ...items,
+        [from]: arr,
+        [to]: target,
+      }
 
       setItems(newItems);
     },
@@ -40,31 +55,35 @@ const Context = () => {
   );
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      {
-        Array.from({ length: columns }, (_, k) => k).map((k) => {
-          const key = `droppable-${k + 1}`;
+    <s.ContainerStyle>
+      <s.ContextContainerStyle>
+        <DragDropContext onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
+          {
+            Array.from({ length: columns }, (_, i) => i).map((i) => {
+              const key = `droppable-${i + 1}`;
 
-          return (
-            <List key={key} id={key}>
-              {
-                items.map((item, index) => {
-                  const key = `draggable-${index + 1}`;
+              return (
+                <List key={key} id={key}>
+                  {
+                    items[`item-${i + 1}`].map((item, index) => {
+                      const key = `draggable-${index + 1}`;
 
-                  return (
-                    <Item
-                      key={key}
-                      item={item}
-                      index={index}
-                    />
-                  )
-                })
-              }
-            </List>
-          )
-        })
-      }
-    </DragDropContext>
+                      return (
+                        <Item
+                          key={key}
+                          item={item}
+                          index={index}
+                        />
+                      )
+                    })
+                  }
+                </List>
+              )
+            })
+          }
+        </DragDropContext>
+      </s.ContextContainerStyle>
+    </s.ContainerStyle>
   )
 }
 

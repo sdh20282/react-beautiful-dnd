@@ -6,9 +6,7 @@ const Container = () => {
   return (
     <s.ContainerStyle>
       <s.TitleStyle>React DnD using react-beautiful-dnd</s.TitleStyle>
-      <s.ContextContainerStyle>
-        <Context />
-      </s.ContextContainerStyle>
+      <Context />
     </s.ContainerStyle>
   )
 }
