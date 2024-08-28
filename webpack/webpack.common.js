@@ -19,7 +19,9 @@ module.exports = {
     ],
     alias: {
       '@components': path.resolve(__dirname, '../src/_components/index.js'),
+      '@data': path.resolve(__dirname, '../src/_data/index.js'),
       '@styles': path.resolve(__dirname, '../src/_styles/index.js'),
+      '@utils': path.resolve(__dirname, '../src/_utils/index.js'),
     }
   },
   plugins: [
