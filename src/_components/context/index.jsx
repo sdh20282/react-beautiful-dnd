@@ -4,6 +4,7 @@ import { DragDropContext } from "react-beautiful-dnd";
 
 import { List, Item } from "@components";
 import { getItems, removeItem, insertItem } from "@utils";
+import { ITEM_COUNT } from "@data";
 
 import * as s from './styles';
 
@@ -12,8 +13,8 @@ const Context = () => {
   const [items, setItems] = useState(Array.from({ length: columns }, (_, i) => i).reduce((acc, _, idx) => {
     const current = {
       ...acc,
-      [`item-${idx + 1}`]: idx === 0 ? getItems(10) : [],
-    }
+      [`item-${idx + 1}`]: idx === 0 ? getItems(ITEM_COUNT) : [],
+    };
 
     return current;
   }, {}));
@@ -47,7 +48,7 @@ const Context = () => {
         ...items,
         [from]: arr,
         [to]: target,
-      }
+      };
 
       setItems(newItems);
     },
