@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 
 import { DragDropContext } from "react-beautiful-dnd";
 
-import { List, Item } from "@components";
+import { Column, Item } from "@components";
 import { getItems, reorder } from "@utils";
 import { ITEM_COUNT } from "@data";
 
@@ -20,7 +20,7 @@ const Context = () => {
   }, {}));
 
   const onDragUpdate = (result) => {
-    // console.log(result);
+    console.log(result);
   }
 
   const onDragEnd = useCallback(
@@ -52,7 +52,7 @@ const Context = () => {
               const key = `droppable-${i + 1}`;
 
               return (
-                <List key={key} id={key}>
+                <Column key={key} id={key}>
                   {
                     items[`item-${i + 1}`].map((item, index) => {
                       const key = `draggable-${index + 1}`;
@@ -66,7 +66,7 @@ const Context = () => {
                       )
                     })
                   }
-                </List>
+                </Column>
               )
             })
           }

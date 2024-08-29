@@ -7,8 +7,8 @@ export {
 } from './context';
 
 export {
-  List
-} from './list';
+  Column
+} from './column';
 
 export {
   Item

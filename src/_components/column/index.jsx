@@ -6,7 +6,7 @@ import { getListStyle } from '@utils';
 
 import * as s from './styles';
 
-const List = ({ children, id }) => {
+const Column = ({ children, id }) => {
   return (
     <Droppable droppableId={id}>
       {(provided, snapshot) => {
@@ -25,4 +25,4 @@ const List = ({ children, id }) => {
   )
 }
 
-export { List };
+export { Column };

@@ -7,6 +7,10 @@ export const getItems = (count) => {
   return items;
 };
 
+export const checkCondition = () => {
+
+}
+
 export const reorder = (items, from, fromIndex, to, toIndex) => {
   const result = {};
 

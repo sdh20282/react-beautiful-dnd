@@ -1,5 +1,6 @@
 export {
   getItems,
+  checkCondition,
   reorder
 } from './item';
 
