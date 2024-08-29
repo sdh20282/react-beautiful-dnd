@@ -1,13 +1,12 @@
 import { GRID } from '@data';
 
 export const getListStyle = (isDraggingOver) => ({
-  background: isDraggingOver ? "lightblue" : "lightgrey",
+  background: isDraggingOver ? "lightblue" : "#EEE",
   padding: GRID,
 });
 
-export const getItemStyle = (isDragging, draggableStyle) => ({
+export const getItemStyle = (draggableStyle) => ({
   padding: GRID * 2,
   margin: `0 0 ${GRID}px 0`,
-  background: isDragging ? "lightgreen" : "grey",
   ...draggableStyle,
 });
