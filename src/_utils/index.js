@@ -10,7 +10,9 @@ export {
 
 export {
   getListStyle,
-  getItemStyle
+  getItemStyle,
+  getBackgroundColor,
+  getColor
 } from './style';
 
 export {

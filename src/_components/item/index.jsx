@@ -4,7 +4,7 @@ import { getItemStyle, checkEventType } from "@utils";
 
 import * as s from './styles';
 
-const Item = ({ item, index, isSelected, changeSelect, changeCtrlSelect }) => {
+const Item = ({ item, index, isSelected, selectedCount, draggingItem, changeSelect }) => {
   const action = (event) => {
     const type = checkEventType(event);
 
@@ -43,10 +43,15 @@ const Item = ({ item, index, isSelected, changeSelect, changeCtrlSelect }) => {
               provided.draggableProps.style
             )}
             selected={isSelected}
+            disabled={draggingItem && isSelected && draggingItem !== item.id}
             onClick={onClick}
             onKeyDown={(event) => { onKeyDown(event, snapshot) }}
           >
             {item.content}
+            {
+              snapshot.isDragging && selectedCount > 1 &&
+              <s.SelectedCount>{selectedCount}</s.SelectedCount>
+            }
           </s.ItemStyle>
         )
       }}

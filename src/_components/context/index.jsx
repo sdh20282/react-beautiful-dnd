@@ -123,6 +123,8 @@ const Context = () => {
                           item={state.entities.items[item]}
                           index={index}
                           isSelected={state.selected.includes(item)}
+                          selectedCount={state.selected.length}
+                          draggingItem={state.dragging}
                           changeSelect={changeSelect}
                         />
                       )
