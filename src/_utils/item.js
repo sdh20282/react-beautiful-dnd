@@ -182,14 +182,14 @@ export const updateSelected = (type, entities, selected, id) => {
 }
 
 // 아이템 재정렬
-export const reorder = (entities, selected, dragging, destination) => {
+export const reorder = (entities, selected, dragging, source, destination) => {
   const itemsSelected = selected.ordered;
 
   // 삽입할 컬럼의 인덱스 계산
   const indexInsert = (() => {
     const indexOffset = entities.columnItems[destination.droppableId].reduce(
       (prev, cur, idx) => {
-        if (idx >= destination.index) {
+        if (idx > destination.index) {
           return prev;
         }
 

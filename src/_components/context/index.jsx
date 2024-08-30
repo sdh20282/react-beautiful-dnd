@@ -67,7 +67,7 @@ const Context = () => {
     }
 
     // 새로운 state 생성
-    const newState = reorder(state.entities, state.selected, state.dragging, end.destination);
+    const newState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
 
     // 업데이트
     setState(s => ({
