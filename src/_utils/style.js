@@ -11,24 +11,28 @@ export const getItemStyle = (draggableStyle) => ({
   ...draggableStyle,
 });
 
-export const getBackgroundColor = ({ selected, disabled }) => {
-  if (disabled) {
+export const getBackgroundColor = ({ $selected, $disabled, $invalid }) => {
+  if ($disabled) {
     return '#352435';
   }
 
-  if (selected) {
+  if ($invalid) {
+    return '#ff4d4d';
+  }
+
+  if ($selected) {
     return '#3689ff';
   }
 
   return '#ffffff';
 }
 
-export const getColor = ({ selected, disabled }) => {
-  if (disabled) {
+export const getColor = ({ $selected, $disabled, $invalid }) => {
+  if ($disabled) {
     return '#cccccc';
   }
 
-  if (selected) {
+  if ($selected || $invalid) {
     return '#ffffff';
   }
 

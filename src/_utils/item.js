@@ -75,12 +75,17 @@ const getOrderedSelectedItems = (entities, selected) => {
   return updated;
 }
 
+// 아이템들이 들어있는 컬럼 리스트 생성
+const getItemColumns = (entities, list) => {
+  return Array.from(new Set(list.map(item => getColumnIdFromItem(entities, item))));
+}
+
 // 선택 관련 정보 업데이트
 const updateSelectedInfo = (entities, list) => {
   return {
     list: list,
     ordered: getOrderedSelectedItems(entities, list),
-    columns: Array.from(new Set(list.map(item => getColumnIdFromItem(entities, item))))
+    columns: getItemColumns(entities, list)
   }
 }
 
@@ -221,11 +226,16 @@ export const reorder = (entities, selected, dragging, source, destination) => {
   // 선택한 아이템 삽입
   updated[destination.droppableId].splice(indexInsert, 0, ...itemsSelected);
 
+  const updatedEntities = {
+    ...entities,
+    columnItems: updated
+  }
+
   return {
-    entities: {
-      ...entities,
-      columnItems: updated
+    entities: updatedEntities,
+    selected: {
+      ...selected,
+      columns: [destination.droppableId],
     },
-    selected,
   };
 };

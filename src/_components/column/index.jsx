@@ -6,9 +6,9 @@ import { getListStyle } from '@utils';
 
 import * as s from './styles';
 
-const Column = ({ children, id }) => {
+const Column = ({ children, id, inValid }) => {
   return (
-    <Droppable droppableId={id}>
+    <Droppable droppableId={id} isDropDisabled={inValid}>
       {(provided, snapshot) => {
         return (
           <s.ListStyle

@@ -1,6 +1,12 @@
 export {
-  checkEventType
+  checkEventType,
 } from './check';
+
+export {
+  initError,
+  checkColumnException,
+  checkEvenItemException
+} from './error';
 
 export {
   getEntities,

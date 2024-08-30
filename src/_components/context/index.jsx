@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 import { DragDropContext } from "react-beautiful-dnd";
 
 import { Column, Item } from "@components";
-import { getEntities, initSelected, updateSelected, reorder, windowEventHandler } from "@utils";
+import { getEntities, initSelected, initError, updateSelected, reorder, windowEventHandler, checkColumnException, checkEvenItemException } from "@utils";
 import { COLUMN_COUNT, ITEM_COUNT } from "@data";
 
 import * as s from './styles';
@@ -22,6 +22,12 @@ const Context = () => {
     dragging: null
   });
 
+  // 에러 정보
+  const [error, setError] = useState(initError());
+
+  const drag = useRef(false);
+  const animationFrame = useRef(null);
+
   // 선택된 아이템 전부 제거
   const unSelectAll = useCallback(() => {
     setState(s => ({
@@ -32,6 +38,12 @@ const Context = () => {
 
   // 드래그 시작 시
   const onDragStart = useCallback((start) => {
+    if (!start.source) {
+      return;
+    }
+
+    drag.current = true;
+
     const id = start.draggableId;
     const selected = state.selected.ordered.find(i => i === id);
 
@@ -39,7 +51,7 @@ const Context = () => {
     const updated = !selected ? {
       list: [id],
       ordered: [id],
-      columns: [start.source.draggableId],
+      columns: [start.source.droppableId],
     } : state.selected;
 
     // 어떤 아이템 드래그중인지 설정
@@ -50,14 +62,46 @@ const Context = () => {
     }));
   }, [state]);
 
+  // 업데이트 시
   const onDragUpdate = (update) => {
-    // console.log(update);
+    if (!update.destination) {
+      return;
+    }
+
+    // 첫번째 열 -> 세번째 열로 바로 이동하는 경우
+    if (checkColumnException(state.selected.columns, update)) {
+      setError({
+        error: true,
+        message: '첫번째 열의 아이템은 세번째 열로 이동할 수 없습니다.',
+        target: update.destination.droppableId
+      });
+
+      return;
+    }
+
+    if (checkEvenItemException(state.entities.columnItems[update.destination.droppableId], state.selected.list, state.selected.ordered[state.selected.ordered.length - 1], update.destination.index, state.dragging)) {
+      setError({
+        error: true,
+        message: '짝수 아이템은 다른 짝수 아이템 앞으로 올 수 없습니다.',
+        target: update.destination.droppableId
+      })
+
+      return;
+    }
+
+    if (error.error) {
+      setError(initError());
+    }
   }
 
   // 드래그 종료 시
   const onDragEnd = useCallback((end) => {
-    // destination이 column이 아니거나 cancel 시 드래그 중인 아이템 초기화
-    if (!end.destination || end.reason === 'CANCEL') {
+    drag.current = false;
+
+    // destination이 column이 아니거나 cancel, error시 드래그 중인 아이템 초기화
+    if (!end.destination || end.reason === 'CANCEL' || error.error) {
+      setError(initError());
+
       setState(s => ({
         ...s,
         dragging: null
@@ -75,7 +119,7 @@ const Context = () => {
       ...newState,
       dragging: null,
     }));
-  }, [state]);
+  }, [state, error]);
 
   // 아이템 선택
   const changeSelect = useCallback((type, id) => {
@@ -87,6 +131,25 @@ const Context = () => {
       selected: updated
     }));
   }, [state]);
+
+  // console.log('render');
+
+
+  // const test = useCallback(() => {
+  //   if (!drag.current) {
+  //     return;
+  //   }
+
+  //   if (animationFrame.current) {
+  //     return;
+  //   }
+
+  //   animationFrame.current = requestAnimationFrame(() => {
+  //     setError(initError());
+
+  //     animationFrame.current = null;
+  //   });
+  // }, []);
 
   // 멀티 드래그 해제를 위해 window 객체에 관련 이벤트 핸들러 등록
   useEffect(() => {
@@ -100,6 +163,8 @@ const Context = () => {
       return current;
     }, {});
 
+    // window.addEventListener('mousemove', test);
+
     windowEvents.forEach(e => {
       window.addEventListener(e, eventHandlers[e]);
     });
@@ -108,27 +173,40 @@ const Context = () => {
       windowEvents.forEach(e => {
         window.removeEventListener(e, eventHandlers[e]);
       });
+
+      // window.removeEventListener('mousemove', test);
     };
   }, []);
+
+  // console.log(error, animationFrame.current);
 
   return (
     <s.ContainerStyle>
       <s.ContextContainerStyle>
-        <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd}>
+        <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd} >
           {
             state.entities.columns.map((column) => {
+              // const inValid = error.error && error.target === column;
+              const inValid = false;
+
               return (
-                <Column key={column} id={column}>
+                <Column key={column} id={column} inValid={inValid}>
                   {
                     state.entities.columnItems[column].map((item, index) => {
+                      const curItem = state.entities.items[item];
+                      const isSelected = state.selected.ordered.includes(curItem.id);
+                      const isExtra = state.dragging && isSelected && state.dragging !== curItem.id;
+                      const isError = state.dragging && error.error && state.dragging === curItem.id;
+
                       return (
                         <Item
-                          key={state.entities.items[item].id}
-                          item={state.entities.items[item]}
+                          key={curItem.id}
+                          item={curItem}
                           index={index}
-                          isSelected={state.selected.ordered.includes(item)}
+                          isSelected={isSelected}
+                          isExtra={isExtra}
+                          isError={isError}
                           selectedCount={state.selected.ordered.length}
-                          draggingItem={state.dragging}
                           changeSelect={changeSelect}
                         />
                       )
