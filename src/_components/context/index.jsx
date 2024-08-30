@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 
 import { Column, Item } from "@components";
-import { getEntities, updateSelected, reorder, windowEventHandler } from "@utils";
+import { getEntities, initSelected, updateSelected, reorder, windowEventHandler } from "@utils";
 import { COLUMN_COUNT, ITEM_COUNT } from "@data";
 
 import * as s from './styles';
@@ -18,7 +18,7 @@ const Context = () => {
   // 상태 정보
   const [state, setState] = useState({
     entities: getEntities(info.columns, info.items),
-    selected: [],
+    selected: initSelected(),
     dragging: null
   });
 
@@ -26,22 +26,26 @@ const Context = () => {
   const unSelectAll = useCallback(() => {
     setState(s => ({
       ...s,
-      selected: []
+      selected: initSelected(),
     }));
   }, []);
 
   // 드래그 시작 시
   const onDragStart = useCallback((start) => {
     const id = start.draggableId;
-    const selected = state.selected.find(i => i === id);
+    const selected = state.selected.ordered.find(i => i === id);
 
     // 현재 드래그하는 아이템이 selected 리스트에 있지 않을 경우 갱신
-    const selectedList = !selected ? [id] : state.selected;
+    const updated = !selected ? {
+      list: [id],
+      ordered: [id],
+      columns: [start.source.draggableId],
+    } : state.selected;
 
     // 어떤 아이템 드래그중인지 설정
     setState(s => ({
       ...s,
-      selected: selectedList,
+      selected: updated,
       dragging: id
     }));
   }, [state]);
@@ -63,7 +67,7 @@ const Context = () => {
     }
 
     // 새로운 state 생성
-    const newState = reorder(state.entities, state.selected, end.destination);
+    const newState = reorder(state.entities, state.selected, state.dragging, end.destination);
 
     // 업데이트
     setState(s => ({
@@ -75,12 +79,12 @@ const Context = () => {
 
   // 아이템 선택
   const changeSelect = useCallback((type, id) => {
-    const newSelected = updateSelected(type, state.entities, state.selected, id);
+    const updated = updateSelected(type, state.entities, state.selected, id);
 
     // 선택된 아이템 리스트 업데이트
     setState(s => ({
       ...s,
-      selected: newSelected
+      selected: updated
     }));
   }, [state]);
 
@@ -122,8 +126,8 @@ const Context = () => {
                           key={state.entities.items[item].id}
                           item={state.entities.items[item]}
                           index={index}
-                          isSelected={state.selected.includes(item)}
-                          selectedCount={state.selected.length}
+                          isSelected={state.selected.ordered.includes(item)}
+                          selectedCount={state.selected.ordered.length}
                           draggingItem={state.dragging}
                           changeSelect={changeSelect}
                         />

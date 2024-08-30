@@ -4,6 +4,7 @@ export {
 
 export {
   getEntities,
+  initSelected,
   updateSelected,
   reorder
 } from './item';

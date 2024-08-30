@@ -42,66 +42,122 @@ export const getEntities = (columnCount, itemCount) => {
   };
 }
 
-// 클릭 시 선택된 아이템 업데이트
-const updateSelectClick = (selected, id) => {
-  const selectedList = selected;
-  const wasSelected = selectedList.includes(id);
-
-  const newSelectedList = (() => {
-    if (!wasSelected || selectedList.length > 1) {
-      return [id];
-    }
-
-    return [];
-  })();
-
-  return newSelectedList;
+// 선택 관련 정보를 담은 객체 초기화
+export const initSelected = () => {
+  return {
+    list: [],
+    ordered: [],
+    columns: [],
+  };
 }
 
-// 컨트롤 + 클릭 시 선택된 아이템 업데이트
-const updateSelectCtrl = (selected, id) => {
-  const selectedList = selected;
-  const index = selectedList.indexOf(id);
-
-  if (index === -1) {
-    return [...selectedList, id];
-  }
-
-  selectedList.splice(index, 1);
-
-  return selectedList;
-}
-
-// 아이템으로 해당 컬럼 찾기
-const columnFromItem = (entities, id) => {
+// 아이템으로 컬럼 아이디 찾기
+const getColumnIdFromItem = (entities, id) => {
   const columnId = entities.columns.find(ci => {
     const columnItems = entities.columnItems[ci];
 
     return columnItems.includes(id);
   });
 
-  return entities.columnItems[columnId];
+  return columnId;
 }
 
+// 선택된 아이템들을 화면상의 순서에 맞게 정렬
+const getOrderedSelectedItems = (entities, selected) => {
+  const updated = entities.columns.reduce((prev, cur) => {
+    const column = entities.columnItems[cur];
+
+    prev.push(...column.filter(item => selected.includes(item)));
+
+    return prev;
+  }, []);
+
+  return updated;
+}
+
+// 선택 관련 정보 업데이트
+const updateSelectedInfo = (entities, list) => {
+  return {
+    list: list,
+    ordered: getOrderedSelectedItems(entities, list),
+    columns: Array.from(new Set(list.map(item => getColumnIdFromItem(entities, item))))
+  }
+}
+
+// 클릭 시 선택된 아이템 업데이트
+const updateSelectClick = ({
+  entities,
+  selected,
+  id
+}) => {
+  const list = selected.list;
+  const wasSelected = list.includes(id);
+
+  const udpated = (() => {
+    if (!wasSelected || list.length > 1) {
+      const updatedList = [id];
+
+      return updateSelectedInfo(entities, updatedList);
+    }
+
+    return initSelected();
+  })();
+
+  return udpated;
+}
+
+// 컨트롤 + 클릭 시 선택된 아이템 업데이트
+const updateSelectCtrl = ({
+  entities,
+  selected,
+  id
+}) => {
+  const list = selected.list;
+  const index = list.indexOf(id);
+
+  const updated = (() => {
+    if (index === -1) {
+      const updatedList = [...list, id];
+
+      return updateSelectedInfo(entities, updatedList);
+    } else {
+      list.splice(index, 1);
+
+      return updateSelectedInfo(entities, list);
+    }
+  })();
+
+  return updated;
+}
 // 쉬프트 + 클릭 시 선택된 아이템 업데이트
-const updateSelectShift = (selected, id, entities) => {
-  if (!selected.length) {
-    return [id];
+const updateSelectShift = ({
+  entities,
+  selected,
+  id
+}) => {
+  if (!selected.list.length) {
+    const updatedList = [id];
+
+    return updateSelectedInfo(entities, updatedList);
   }
 
-  const columnTo = columnFromItem(entities, id);
+  const columnTo = entities.columnItems[getColumnIdFromItem(entities, id)];
   const indexTo = columnTo.indexOf(id);
 
-  const lastSelected = selected[selected.length - 1];
-  const columnFrom = columnFromItem(entities, lastSelected);
+  const lastSelected = selected.list[selected.list.length - 1];
+  const columnFrom = entities.columnItems[getColumnIdFromItem(entities, lastSelected)];
   const indexFrom = columnFrom.indexOf(lastSelected);
 
   if (columnFrom !== columnTo) {
-    return columnTo.slice(indexTo, indexTo + 1);
+    const updatedList = columnTo.slice(indexTo, indexTo + 1);
+
+    return updateSelectedInfo(entities, updatedList);
   }
 
   if (indexFrom === indexTo) {
-    return [id];
+    const updatedList = [id];
+
+    return updateSelectedInfo(entities, updatedList);
   }
 
   const direction = indexTo > indexFrom;
@@ -109,9 +165,9 @@ const updateSelectShift = (selected, id, entities) => {
   const end = direction ? indexTo : indexFrom;
 
   const between = columnTo.slice(start, end + 1);
-  const newSelectedList = [...selected.filter(s => !between.includes(s)), ...between];
+  const newSelectedList = [...selected.list.filter(s => !between.includes(s)), ...(direction ? between : between.reverse())];
 
-  return newSelectedList;
+  return updateSelectedInfo(entities, newSelectedList);
 }
 
 // 선택된 아이템 업데이트
@@ -122,52 +178,38 @@ export const updateSelected = (type, entities, selected, id) => {
     'shift': updateSelectShift,
   }
 
-  return update[type](selected, id, entities);
+  return update[type]({ selected, id, entities });
 }
 
 // 아이템 재정렬
-export const reorder = (entities, selected, destination) => {
-  // 움직일 아이템 리스트 생성
-  // 순서 보존을 위해
-  const itemsSelected = entities.columns.reduce((prev, cur) => {
-    const column = entities.columnItems[cur];
-
-    prev.push(...column.filter(item => selected.includes(item)));
-
-    return prev;
-  }, []);
+export const reorder = (entities, selected, dragging, destination) => {
+  const itemsSelected = selected.ordered;
 
   // 삽입할 컬럼의 인덱스 계산
   const indexInsert = (() => {
-    const indexOffset = selected.reduce(
-      (prev, cur) => {
-        if (cur === itemsSelected[0]) {
+    const indexOffset = entities.columnItems[destination.droppableId].reduce(
+      (prev, cur, idx) => {
+        if (idx >= destination.index) {
           return prev;
         }
 
-        const final = entities.columnItems[destination.droppableId];
-        const column = columnFromItem(entities, cur);
-
-        if (column !== final) {
+        if (cur === dragging) {
           return prev;
         }
 
-        const index = column.indexOf(cur);
-
-        if (index >= destination.index) {
+        if (!itemsSelected.includes(cur)) {
           return prev;
         }
 
         return prev + 1;
-      },
-      0,
+      }, 0
     );
 
     return destination.index - indexOffset;
   })();
 
   // 선택된 항목을 제외하고 남아있는 컬럼의 아이템들 계산
-  const update = entities.columns.reduce((prev, cur) => {
+  const updated = entities.columns.reduce((prev, cur) => {
     const column = entities.columnItems[cur];
     const remain = column.filter(item => !itemsSelected.includes(item));
 
@@ -177,12 +219,12 @@ export const reorder = (entities, selected, destination) => {
   }, {});
 
   // 선택한 아이템 삽입
-  update[destination.droppableId].splice(indexInsert, 0, ...itemsSelected);
+  updated[destination.droppableId].splice(indexInsert, 0, ...itemsSelected);
 
   return {
     entities: {
       ...entities,
-      columnItems: update,
+      columnItems: updated
     },
     selected,
   };
