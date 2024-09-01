@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 
 import { Column, Item } from "@components";
-import { getEntities, initSelected, initError, updateSelected, reorder, windowEventHandler, checkColumnException, checkEvenItemException } from "@utils";
+import { getEntities, initSelected, initError, updateSelected, reorder, windowEventHandler, checkColumnException, checkEvenItemException, addColumn, removeColumn, addItem, deleteItem } from "@utils";
 import { COLUMN_COUNT, ITEM_COUNT, ITEM_HEIGHT } from "@data";
 
 import * as s from './styles';
@@ -24,6 +24,7 @@ const Context = () => {
 
   // 에러 정보
   const error = useRef(initError());
+
   const drag = useRef(false);
   const animationFrame = useRef(null);
   const mouseY = useRef(0);
@@ -31,6 +32,7 @@ const Context = () => {
   // 강제 리렌더링을 위한 state
   const [_, setRender] = useState(false);
 
+  // 강제 리렌더 함수
   const rerender = useCallback(() => {
     setRender(s => !s);
   }, []);
@@ -47,18 +49,11 @@ const Context = () => {
   const onClickAddColumn = useCallback((event) => {
     event.preventDefault();
 
-    const newColumn = `column-${info.columns + 1}`;
+    const updatedColumn = addColumn({ entities: state.entities, number: info.columns });
 
     setState(s => ({
       ...s,
-      entities: {
-        ...s.entities,
-        columns: [...s.entities.columns, newColumn],
-        columnItems: {
-          ...s.entities.columnItems,
-          [newColumn]: []
-        },
-      }
+      entities: updatedColumn
     }));
 
     setInfo(s => ({
@@ -67,25 +62,19 @@ const Context = () => {
     }));
   }, [info]);
 
+  // 컬럼 삭제를 위한 함수
   const onClickRemoveColumn = useCallback((event) => {
     event.preventDefault();
 
-    const lastColumn = `column-${info.columns}`;
-    const prevColumn = `column-${info.columns - 1}`
-    const updatedEntities = state.entities;
-    const updatedSelected = state.selected;
-
-    if (updatedEntities.columnItems[lastColumn].length > 0) {
-      updatedEntities.columnItems[prevColumn] = [...updatedEntities.columnItems[prevColumn], ...updatedEntities.columnItems[lastColumn]];
-
-      const targetIndex = updatedSelected.columns.indexOf(lastColumn);
-
-      updatedSelected.columns.splice(targetIndex, 1);
-      updatedSelected.columns = Array.from(new Set([...updatedSelected.columns, prevColumn]));
-    }
-
-    updatedEntities.columns.length -= 1;
-    delete updatedEntities.columnItems[lastColumn];
+    const {
+      updatedEntities,
+      updatedSelected
+    } = removeColumn({
+      entities: state.entities,
+      selected: state.selected,
+      lastColumn: `column-${info.columns}`,
+      prevColumn: `column-${info.columns - 1}`,
+    });
 
     setState(s => ({
       ...s,
@@ -98,6 +87,43 @@ const Context = () => {
       columns: s.columns - 1
     }));
   }, [state, info]);
+
+  // 아이템 추가를 위한 함수
+  const onClickAddItem = () => {
+    const updatedEntities = addItem({
+      entities: state.entities,
+      number: info.items,
+    });
+
+    setState(s => ({
+      ...s,
+      entities: updatedEntities
+    }));
+
+    setInfo(s => ({
+      ...s,
+      items: s.items + 1,
+    }))
+  }
+
+  // 아이템 삭제를 위한 함수
+  const onClickDeleteItem = () => {
+    if (state.selected.list.length === 0) {
+      return;
+    }
+
+    const updatedEntities = deleteItem({
+      entities: state.entities,
+      selectedList: state.selected.list,
+    });
+
+    setState(s => ({
+      ...s,
+      entities: updatedEntities,
+      selected: initSelected(),
+      dragging: null,
+    }));
+  }
 
   // 드래그 시작 시
   const onDragStart = useCallback((start) => {
@@ -194,12 +220,12 @@ const Context = () => {
     }
 
     // 새로운 state 생성
-    const newState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
+    const updatedState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
 
     // 업데이트
     setState(s => ({
       ...s,
-      ...newState,
+      ...updatedState,
       dragging: null,
     }));
   }, [state, error]);
@@ -316,6 +342,10 @@ const Context = () => {
           }
         </DragDropContext>
       </s.ContextContainerStyle>
+      <div>
+        <button onClick={onClickAddItem}>add item</button>
+        <button onClick={onClickDeleteItem}>delete selected item</button>
+      </div>
     </s.ContainerStyle>
   )
 }

@@ -12,7 +12,11 @@ export {
   getEntities,
   initSelected,
   updateSelected,
-  reorder
+  reorder,
+  addColumn,
+  removeColumn,
+  addItem,
+  deleteItem
 } from './item';
 
 export {

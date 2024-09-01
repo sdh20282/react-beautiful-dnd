@@ -241,3 +241,68 @@ export const reorder = (entities, selected, dragging, source, destination) => {
     },
   };
 };
+
+export const addColumn = ({ entities, number }) => {
+  const updatedEntities = entities;
+  const newColumn = `column-${number + 1}`;
+
+  updatedEntities.columns.push(newColumn);
+  updatedEntities.columnItems[newColumn] = [];
+
+  return updatedEntities;
+};
+
+export const removeColumn = ({ entities, selected, lastColumn, prevColumn }) => {
+  const updatedEntities = entities;
+  const updatedSelected = selected;
+
+  if (updatedEntities.columnItems[lastColumn].length > 0) {
+    updatedEntities.columnItems[prevColumn] = [...updatedEntities.columnItems[prevColumn], ...updatedEntities.columnItems[lastColumn]];
+
+    const targetIndex = updatedSelected.columns.indexOf(lastColumn);
+
+    updatedSelected.columns.splice(targetIndex, 1);
+    updatedSelected.columns = Array.from(new Set([...updatedSelected.columns, prevColumn]));
+  }
+
+  updatedEntities.columns.length -= 1;
+  delete updatedEntities.columnItems[lastColumn];
+
+  return {
+    updatedEntities,
+    updatedSelected
+  }
+}
+
+export const addItem = ({ entities, number }) => {
+  const updatedEntities = entities;
+
+  updatedEntities.items[`item-${number}`] = {
+    id: `item-${number}`,
+    content: `item ${number}`,
+    even: number % 2 === 0 ? true : false
+  }
+  updatedEntities.columnItems['column-1'].push(`item-${number}`);
+
+  return updatedEntities;
+}
+
+export const deleteItem = ({ entities, selectedList }) => {
+  const updatedEntities = entities;
+
+  for (const selectedItem of selectedList) {
+    for (const columns of entities.columns) {
+      const targetColumnItems = entities.columnItems[columns];
+
+      if (targetColumnItems.includes(selectedItem)) {
+        const index = targetColumnItems.indexOf(selectedItem);
+
+        targetColumnItems.splice(index, 1);
+      }
+    }
+
+    delete updatedEntities.items[selectedItem];
+  }
+
+  return updatedEntities;
+};
