@@ -126,7 +126,7 @@ const Context = () => {
     drag.current = false;
 
     // destination이 column이 아니거나 cancel, error시 드래그 중인 아이템 초기화
-    if (!end.destination || end.reason === 'CANCEL' || error.error) {
+    if (!end.destination || end.reason === 'CANCEL' || error.current.error) {
       error.current = initError();
 
       setState(s => ({
