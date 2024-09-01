@@ -43,6 +43,62 @@ const Context = () => {
     }));
   }, []);
 
+  // 컬럼 추가를 위한 함수
+  const onClickAddColumn = useCallback((event) => {
+    event.preventDefault();
+
+    const newColumn = `column-${info.columns + 1}`;
+
+    setState(s => ({
+      ...s,
+      entities: {
+        ...s.entities,
+        columns: [...s.entities.columns, newColumn],
+        columnItems: {
+          ...s.entities.columnItems,
+          [newColumn]: []
+        },
+      }
+    }));
+
+    setInfo(s => ({
+      ...s,
+      columns: s.columns + 1
+    }));
+  }, [info]);
+
+  const onClickRemoveColumn = useCallback((event) => {
+    event.preventDefault();
+
+    const lastColumn = `column-${info.columns}`;
+    const prevColumn = `column-${info.columns - 1}`
+    const updatedEntities = state.entities;
+    const updatedSelected = state.selected;
+
+    if (updatedEntities.columnItems[lastColumn].length > 0) {
+      updatedEntities.columnItems[prevColumn] = [...updatedEntities.columnItems[prevColumn], ...updatedEntities.columnItems[lastColumn]];
+
+      const targetIndex = updatedSelected.columns.indexOf(lastColumn);
+
+      updatedSelected.columns.splice(targetIndex, 1);
+      updatedSelected.columns = Array.from(new Set([...updatedSelected.columns, prevColumn]));
+    }
+
+    updatedEntities.columns.length -= 1;
+    delete updatedEntities.columnItems[lastColumn];
+
+    setState(s => ({
+      ...s,
+      entities: updatedEntities,
+      selected: updatedSelected,
+    }));
+
+    setInfo(s => ({
+      ...s,
+      columns: s.columns - 1
+    }));
+  }, [state, info]);
+
   // 드래그 시작 시
   const onDragStart = useCallback((start) => {
     if (!start.source) {
@@ -221,12 +277,15 @@ const Context = () => {
 
   return (
     <s.ContainerStyle>
+      <div>
+        <button onClick={onClickRemoveColumn}>remove col</button>
+        <button onClick={onClickAddColumn}>add col</button>
+      </div>
       <s.ContextContainerStyle>
         <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd} >
           {
             state.entities.columns.map((column) => {
               const inValid = error.current.error && error.current.target === column;
-              // const inValid = false;
 
               return (
                 <Column key={column} id={column} inValid={inValid}>
