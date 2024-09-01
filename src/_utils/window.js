@@ -16,16 +16,7 @@ const onWindowClick = (event, callback) => {
   callback();
 };
 
-const onWindowTouchEnd = (event, callback) => {
-  if (event.defaultPrevented) {
-    return;
-  }
-
-  callback();
-};
-
 export const windowEventHandler = {
   'click': onWindowClick,
-  'keydown': onWindowKeyDown,
-  'touchend': onWindowTouchEnd
+  'keydown': onWindowKeyDown
 };

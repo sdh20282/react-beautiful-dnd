@@ -6,6 +6,7 @@ const getItems = (count) => {
       [`item-${idx}`]: {
         id: `item-${idx}`,
         content: `item ${idx}`,
+        even: idx % 2 === 0 ? true : false,
       }
     }
 
@@ -26,6 +27,7 @@ const getColumns = (count) => {
 export const getEntities = (columnCount, itemCount) => {
   const items = getItems(itemCount);
   const columns = getColumns(columnCount);
+  // 컬럼: id 리스트로 객체 생성
   const columnItems = columns.reduce((prev, cur, idx) => {
     const current = {
       ...prev,
@@ -213,7 +215,7 @@ export const reorder = (entities, selected, dragging, source, destination) => {
     return destination.index - indexOffset;
   })();
 
-  // 선택된 항목을 제외하고 남아있는 컬럼의 아이템들 계산
+  // 선택된 항목을 제외하고 남아있는 컬럼의 아이템들 확인
   const updated = entities.columns.reduce((prev, cur) => {
     const column = entities.columnItems[cur];
     const remain = column.filter(item => !itemsSelected.includes(item));

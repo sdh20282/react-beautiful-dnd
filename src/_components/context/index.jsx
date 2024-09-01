@@ -23,10 +23,17 @@ const Context = () => {
   });
 
   // 에러 정보
-  const [error, setError] = useState(initError());
-
+  const error = useRef(initError());
   const drag = useRef(false);
   const animationFrame = useRef(null);
+  const mouseY = useRef(0);
+
+  // 강제 리렌더링을 위한 state
+  const [_, setRender] = useState(false);
+
+  const rerender = useCallback(() => {
+    setRender(s => !s);
+  }, []);
 
   // 선택된 아이템 전부 제거
   const unSelectAll = useCallback(() => {
@@ -43,6 +50,7 @@ const Context = () => {
     }
 
     drag.current = true;
+    error.current = initError();
 
     const id = start.draggableId;
     const selected = state.selected.ordered.find(i => i === id);
@@ -69,28 +77,47 @@ const Context = () => {
     }
 
     // 첫번째 열 -> 세번째 열로 바로 이동하는 경우
-    if (checkColumnException(state.selected.columns, update)) {
-      setError({
+    if (checkColumnException({
+      selectedColumns: state.selected.columns,
+      update
+    })) {
+      error.current = {
         error: true,
         message: '첫번째 열의 아이템은 세번째 열로 이동할 수 없습니다.',
-        target: update.destination.droppableId
-      });
+        target: update.destination.droppableId,
+        type: 'column',
+      };
+
+      rerender();
 
       return;
     }
 
-    if (checkEvenItemException(state.entities.columnItems[update.destination.droppableId], state.selected.list, state.selected.ordered[state.selected.ordered.length - 1], update.destination.index, state.dragging)) {
-      setError({
+    // 마지막 짝수 아이템이 다른 짝수 아이템 앞으로 오는 경우
+    if (checkEvenItemException({
+      items: state.entities.items,
+      targetList: state.entities.columnItems[update.destination.droppableId],
+      selectedList: state.selected.list,
+      lastItem: state.selected.ordered[state.selected.ordered.length - 1],
+      index: update.destination.index,
+      dragging: state.dragging
+    })) {
+      error.current = {
         error: true,
         message: '짝수 아이템은 다른 짝수 아이템 앞으로 올 수 없습니다.',
-        target: update.destination.droppableId
-      })
+        target: update.destination.droppableId,
+        type: 'item',
+      };
+
+      rerender();
 
       return;
     }
 
-    if (error.error) {
-      setError(initError());
+    if (error.current.error) {
+      error.current = initError();
+
+      rerender();
     }
   }
 
@@ -100,7 +127,7 @@ const Context = () => {
 
     // destination이 column이 아니거나 cancel, error시 드래그 중인 아이템 초기화
     if (!end.destination || end.reason === 'CANCEL' || error.error) {
-      setError(initError());
+      error.current = initError();
 
       setState(s => ({
         ...s,
@@ -132,53 +159,65 @@ const Context = () => {
     }));
   }, [state]);
 
-  // console.log('render');
-
-
-  // const test = useCallback(() => {
-  //   if (!drag.current) {
-  //     return;
-  //   }
-
-  //   if (animationFrame.current) {
-  //     return;
-  //   }
-
-  //   animationFrame.current = requestAnimationFrame(() => {
-  //     setError(initError());
-
-  //     animationFrame.current = null;
-  //   });
-  // }, []);
-
   // 멀티 드래그 해제를 위해 window 객체에 관련 이벤트 핸들러 등록
   useEffect(() => {
     const windowEvents = Object.keys(windowEventHandler);
     const eventHandlers = windowEvents.reduce((acc, cur) => {
       const current = {
         ...acc,
-        [cur]: (event) => { windowEventHandler[cur](event, unSelectAll) },
+        [cur]: (event) => {
+          windowEventHandler[cur](event, () => {
+            error.current = initError();
+
+            unSelectAll();
+          })
+        },
       };
 
       return current;
     }, {});
 
-    // window.addEventListener('mousemove', test);
+    // 강제 리렌더링을 통한 에러 재검사
+    const revalidateError = (event) => {
+      if (!drag.current) {
+        return;
+      }
+
+      if (animationFrame.current) {
+        return;
+      }
+
+      if (!error.current.error || error.current.type !== 'item') {
+        return;
+      }
+
+      if (Math.abs(mouseY.current - event.clientY) < 25) {
+        return;
+      }
+
+      animationFrame.current = requestAnimationFrame(() => {
+        error.current = initError();
+        animationFrame.current = null;
+        mouseY.current = event.clientY;
+
+        rerender();
+      });
+    };
 
     windowEvents.forEach(e => {
       window.addEventListener(e, eventHandlers[e]);
     });
+
+    window.addEventListener('mousemove', revalidateError);
 
     return () => {
       windowEvents.forEach(e => {
         window.removeEventListener(e, eventHandlers[e]);
       });
 
-      // window.removeEventListener('mousemove', test);
+      window.removeEventListener('mousemove', revalidateError);
     };
   }, []);
-
-  // console.log(error, animationFrame.current);
 
   return (
     <s.ContainerStyle>
@@ -186,8 +225,8 @@ const Context = () => {
         <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd} >
           {
             state.entities.columns.map((column) => {
-              // const inValid = error.error && error.target === column;
-              const inValid = false;
+              const inValid = error.current.error && error.current.target === column;
+              // const inValid = false;
 
               return (
                 <Column key={column} id={column} inValid={inValid}>
@@ -196,7 +235,7 @@ const Context = () => {
                       const curItem = state.entities.items[item];
                       const isSelected = state.selected.ordered.includes(curItem.id);
                       const isExtra = state.dragging && isSelected && state.dragging !== curItem.id;
-                      const isError = state.dragging && error.error && state.dragging === curItem.id;
+                      const isError = state.dragging && error.current.error && state.dragging === curItem.id;
 
                       return (
                         <Item
