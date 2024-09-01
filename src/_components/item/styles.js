@@ -5,6 +5,9 @@ import { getBackgroundColor, getColor } from '@utils';
 export const ItemStyle = styled.div`
   position: relative;
 
+  display: flex;
+  align-items: center;
+
   user-select: none;
 
   border-radius: 8px;

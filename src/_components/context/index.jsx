@@ -4,7 +4,7 @@ import { DragDropContext } from "react-beautiful-dnd";
 
 import { Column, Item } from "@components";
 import { getEntities, initSelected, initError, updateSelected, reorder, windowEventHandler, checkColumnException, checkEvenItemException } from "@utils";
-import { COLUMN_COUNT, ITEM_COUNT } from "@data";
+import { COLUMN_COUNT, ITEM_COUNT, ITEM_HEIGHT } from "@data";
 
 import * as s from './styles';
 
@@ -191,7 +191,7 @@ const Context = () => {
         return;
       }
 
-      if (Math.abs(mouseY.current - event.clientY) < 25) {
+      if (Math.abs(mouseY.current - event.clientY) < ITEM_HEIGHT / 2) {
         return;
       }
 
