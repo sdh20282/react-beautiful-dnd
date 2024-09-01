@@ -3,7 +3,6 @@ import { GRID, ITEM_HEIGHT } from '@data';
 // 리스트 스타일 계산
 export const getListStyle = (isDraggingOver) => ({
   background: isDraggingOver ? 'lightblue' : '#EEE',
-  // padding: GRID,
   padding: `${GRID}px ${GRID}px 0 ${GRID}px`,
 });
 
