@@ -8,7 +8,7 @@ import { COLUMN_COUNT, ITEM_COUNT, ITEM_HEIGHT } from "@data";
 
 import * as s from './styles';
 
-const validateY = ITEM_HEIGHT / 3;
+const validateY = (ITEM_HEIGHT * 2) / 5;
 
 const Context = () => {
   // 기본 정보
@@ -330,14 +330,14 @@ const Context = () => {
       window.addEventListener(e, eventHandlers[e]);
     });
 
-    // window.addEventListener('mousemove', revalidateError);
+    window.addEventListener('mousemove', revalidateError);
 
     return () => {
       windowEvents.forEach(e => {
         window.removeEventListener(e, eventHandlers[e]);
       });
 
-      // window.removeEventListener('mousemove', revalidateError);
+      window.removeEventListener('mousemove', revalidateError);
     };
   }, []);
 
@@ -379,8 +379,8 @@ const Context = () => {
           <s.ColumnListStyle>
             {
               state.entities.columns.map((column) => {
-                // const inValid = error.current.error && error.current.target === column;
-                const inValid = false;
+                const inValid = error.current.error && error.current.target === column;
+                // const inValid = false;
 
                 return (
                   <Column key={column} id={column} inValid={inValid}>
