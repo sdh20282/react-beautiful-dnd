@@ -346,6 +346,8 @@ const Context = () => {
           type='column'
           settingType={settingType}
           setType={setSettingType}
+          disableAdd={info.columns === 6}
+          disableRemove={info.columns === 1}
         />
         <Setting
           description='items'

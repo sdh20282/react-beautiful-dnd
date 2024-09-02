@@ -11,6 +11,7 @@ const Setting = ({
   type,
   settingType,
   setType,
+  disableAdd = false,
   disableRemove = false
 }) => {
   const [show, setShow] = useState(false);
@@ -54,7 +55,7 @@ const Setting = ({
       {
         show &&
         <s.ModalStyle>
-          <s.AddButtonStyle onClick={onClickAdd}>
+          <s.AddButtonStyle onClick={onClickAdd} disabled={disableAdd}>
             <span>{addTitle}</span>
           </s.AddButtonStyle>
           <s.RemoveButtonStyle onClick={onClickRemove} disabled={disableRemove}>
