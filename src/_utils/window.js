@@ -1,3 +1,4 @@
+// 윈도우에 등록될 이벤트 정의
 const onWindowKeyDown = (event, callback) => {
   if (event.defaultPrevented) {
     return;

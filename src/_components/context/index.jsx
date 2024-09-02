@@ -27,6 +27,7 @@ const Context = () => {
   // 에러 정보
   const error = useRef(initError());
 
+  // 기타 처리를 위한 정보
   const drag = useRef(false);
   const animationFrame = useRef(null);
   const mouseY = useRef(0);
@@ -52,8 +53,10 @@ const Context = () => {
 
   // 컬럼 추가를 위한 함수
   const onClickAddColumn = useCallback(() => {
+    // 엔티티 정보 갱신
     const updatedColumn = addColumn({ entities: state.entities, number: info.columns });
 
+    // 반영
     setState(s => ({
       ...s,
       entities: updatedColumn
@@ -67,6 +70,7 @@ const Context = () => {
 
   // 컬럼 삭제를 위한 함수
   const onClickRemoveColumn = useCallback(() => {
+    // 엔티티 정보 갱신
     const {
       updatedEntities,
       updatedSelected
@@ -77,6 +81,7 @@ const Context = () => {
       prevColumn: `column-${info.columns - 1}`,
     });
 
+    // 반영
     setState(s => ({
       ...s,
       entities: updatedEntities,
@@ -91,11 +96,13 @@ const Context = () => {
 
   // 아이템 추가를 위한 함수
   const onClickAddItem = useCallback(() => {
+    // 엔티티 정보 갱신
     const updatedEntities = addItem({
       entities: state.entities,
       number: info.items,
     });
 
+    // 반영
     setState(s => ({
       ...s,
       entities: updatedEntities
@@ -109,15 +116,18 @@ const Context = () => {
 
   // 아이템 삭제를 위한 함수
   const onClickDeleteItem = useCallback(() => {
+    // 선택된 아이템이 없을 경우 예외 처리
     if (state.selected.list.length === 0) {
       return;
     }
 
+    // 새로운 엔티티 정보 갱신
     const updatedEntities = deleteItem({
       entities: state.entities,
       selectedList: state.selected.list,
     });
 
+    // 반영
     setState(s => ({
       ...s,
       entities: updatedEntities,
@@ -128,10 +138,12 @@ const Context = () => {
 
   // 드래그 시작 시
   const onDragStart = useCallback((start) => {
+    // 잘못된 위치에서 드래그 시작 시 예외 처리
     if (!start.source) {
       return;
     }
 
+    // drag, error 정보 갱신
     drag.current = true;
     error.current = initError();
 
@@ -155,10 +167,12 @@ const Context = () => {
 
   // 업데이트 시
   const onDragUpdate = useCallback((update) => {
+    // 잘못된 위치에서 업데이트될 경우 예외 처리
     if (!update.destination) {
       return;
     }
 
+    // delete Droppable 처리
     if (update.destination.droppableId === 'delete') {
       error.current = initError();
 
@@ -205,7 +219,9 @@ const Context = () => {
       return;
     }
 
+    // udpate는 발생했지만 에러가 발생하지 않을 경우
     if (error.current.error) {
+      // 에러 정보 갱신
       error.current = initError();
 
       rerender();
@@ -214,6 +230,7 @@ const Context = () => {
 
   // 드래그 종료 시
   const onDragEnd = useCallback((end) => {
+    // drag 정보 갱신
     drag.current = false;
 
     // destination이 column이 아니거나 cancel, error시 드래그 중인 아이템 초기화
@@ -228,7 +245,7 @@ const Context = () => {
       return;
     }
 
-    // delte 영역으로 드래그 시
+    // delete 영역으로 드래그 시
     if (end.destination.droppableId === 'delete') {
       if (state.selected.list.length === 0) {
         return;
@@ -299,7 +316,7 @@ const Context = () => {
       return current;
     }, {});
 
-    // 강제 리렌더링을 통한 에러 재검사
+    // 강제 리렌더링을 통한 에러 재검사 함수
     const revalidateError = (event) => {
       if (!drag.current) {
         return;
@@ -309,29 +326,35 @@ const Context = () => {
         return;
       }
 
+      // 아이템 위치 에러일 경우만 계산
       if (!error.current.error || error.current.type !== 'item') {
         return;
       }
 
+      // 마우스가 일정 범위 이하로 움직였을 경우 계산하지 않음
       if (Math.abs(mouseY.current - event.clientY) < validateY) {
         return;
       }
 
+      // 강제 리렌더링을 통한 에러 검사
       animationFrame.current = requestAnimationFrame(() => {
         error.current = initError();
         animationFrame.current = null;
+        // 마우스 위치 갱신
         mouseY.current = event.clientY;
 
         rerender();
       });
     };
 
+    // 윈도우에 이벤트 핸들러 등록
     windowEvents.forEach(e => {
       window.addEventListener(e, eventHandlers[e]);
     });
 
     window.addEventListener('mousemove', revalidateError);
 
+    // 윈도우에서 이벤트 핸들러 해제
     return () => {
       windowEvents.forEach(e => {
         window.removeEventListener(e, eventHandlers[e]);
@@ -379,16 +402,19 @@ const Context = () => {
           <s.ColumnListStyle>
             {
               state.entities.columns.map((column) => {
+                // 해당 컬럼이 valid한지 계산
                 const inValid = error.current.error && error.current.target === column;
-                // const inValid = false;
 
                 return (
                   <Column key={column} id={column} inValid={inValid}>
                     {
                       state.entities.columnItems[column].map((item, index) => {
                         const curItem = state.entities.items[item];
+                        // 현재 선택된 아이템인지
                         const isSelected = state.selected.ordered.includes(curItem.id);
+                        // 선택된 아이템이지만 드래그 대상이 아닌지
                         const isExtra = state.dragging && isSelected && state.dragging !== curItem.id;
+                        // 에러의 대상인지
                         const isError = state.dragging && error.current.error && state.dragging === curItem.id;
 
                         return (
@@ -413,6 +439,7 @@ const Context = () => {
           <Delete key={'delete'} id={'delete'} />
         </DragDropContext>
         {
+          // 에러 메시지가 있을 경우에만 출력
           error.current.message &&
           <s.ErrorMessageStyle>{error.current.message}</s.ErrorMessageStyle>
         }

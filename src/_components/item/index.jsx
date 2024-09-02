@@ -13,6 +13,7 @@ const _Item = ({ item, index, isSelected, isExtra, isError, selectedCount, chang
     changeSelect(type, item.id);
   }
 
+  // 키다운 이벤트 처리
   const onKeyDown = (event, snapshot) => {
     if (event.defaultPrevented || snapshot.isDragging || event.keyCode !== 13) {
       return;
@@ -23,6 +24,7 @@ const _Item = ({ item, index, isSelected, isExtra, isError, selectedCount, chang
     action(event);
   }
 
+  // 클릭 이벤트 처리
   const onClick = (event) => {
     if (event.defaultPrevented || event.button !== 0) {
       return;
@@ -52,6 +54,7 @@ const _Item = ({ item, index, isSelected, isExtra, isError, selectedCount, chang
           >
             {item.content}
             {
+              // 여러 아이템을 선택 후 드래그할 경우 옆에 선택된 아이템 개수 표시
               snapshot.isDragging && selectedCount > 1 &&
               <s.SelectedCount>{selectedCount}</s.SelectedCount>
             }

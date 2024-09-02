@@ -1,3 +1,4 @@
+// 인자에 따라 계산되는 스타일을 정의
 import { GRID, ITEM_HEIGHT } from '@data';
 import { theme } from '@styles';
 
@@ -7,6 +8,7 @@ export const getListStyle = (isDraggingOver) => ({
   padding: `${GRID}px ${GRID}px 0 ${GRID}px`,
 });
 
+// 삭제 Droppable 스타일 계산
 export const getDeleteStyle = (isDraggingOver) => ({
   background: isDraggingOver ? theme.backgroundColor.cancelHilight : theme.backgroundColor.cancel,
 });
