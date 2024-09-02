@@ -178,7 +178,7 @@ const updateSelectShift = ({
 }
 
 // 선택된 아이템 업데이트
-export const updateSelected = (type, entities, selected, id) => {
+export const updateSelected = ({ type, entities, selected, id }) => {
   const update = {
     'click': updateSelectClick,
     'ctrl': updateSelectCtrl,
@@ -189,7 +189,7 @@ export const updateSelected = (type, entities, selected, id) => {
 }
 
 // 아이템 재정렬
-export const reorder = (entities, selected, dragging, source, destination) => {
+export const reorder = ({ entities, selected, dragging, destination }) => {
   const itemsSelected = selected.ordered;
 
   // 삽입할 컬럼의 인덱스 계산

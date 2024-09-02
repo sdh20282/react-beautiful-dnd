@@ -249,7 +249,12 @@ const Context = () => {
       // 컬럼 영역으로 드래그 시
     } else {
       // 새로운 state 생성
-      const updatedState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
+      const updatedState = reorder({
+        entities: state.entities,
+        selected: state.selected,
+        dragging: state.dragging,
+        destination: end.destination
+      });
 
       // 업데이트
       setState(s => ({
@@ -262,7 +267,12 @@ const Context = () => {
 
   // 아이템 선택
   const changeSelect = useCallback((type, id) => {
-    const updated = updateSelected(type, state.entities, state.selected, id);
+    const updated = updateSelected({
+      type,
+      entities: state.entities,
+      selected: state.selected,
+      id,
+    });
 
     // 선택된 아이템 리스트 업데이트
     setState(s => ({
