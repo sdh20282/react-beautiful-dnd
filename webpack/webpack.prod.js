@@ -19,6 +19,7 @@ module.exports = merge(common, {
                 useBuiltIns: 'usage',
                 corejs: {
                   version: 3,
+                  proposals: true
                 },
               },
             ],
@@ -49,4 +50,14 @@ module.exports = merge(common, {
       chunks: 'all',
     },
   },
+  resolve: {
+    extensions: [
+      '.js'
+    ]
+  },
+  performance: {
+    hints: false,
+    maxEntrypointSize: 512000,
+    maxAssetSize: 512000
+  }
 });
