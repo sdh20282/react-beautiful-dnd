@@ -9,3 +9,9 @@ export const ContextContainerStyle = styled.div`
   display: flex;
   gap: 10px;
 `;
+
+export const SettingContainerStyle = styled.div`
+  display: flex;
+
+  margin-left: auto;
+`;

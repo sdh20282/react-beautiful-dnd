@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 
 import { DragDropContext } from "react-beautiful-dnd";
 
-import { Column, Item } from "@components";
+import { Column, Item, Delete } from "@components";
 import { getEntities, initSelected, initError, updateSelected, reorder, windowEventHandler, checkColumnException, checkEvenItemException, addColumn, removeColumn, addItem, deleteItem } from "@utils";
 import { COLUMN_COUNT, ITEM_COUNT, ITEM_HEIGHT } from "@data";
 
@@ -158,6 +158,10 @@ const Context = () => {
       return;
     }
 
+    if (update.destination.droppableId === 'delete') {
+      return;
+    }
+
     // 첫번째 열 -> 세번째 열로 바로 이동하는 경우
     if (checkColumnException({
       selectedColumns: state.selected.columns,
@@ -219,15 +223,33 @@ const Context = () => {
       return;
     }
 
-    // 새로운 state 생성
-    const updatedState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
+    if (end.destination.droppableId === 'delete') {
+      if (state.selected.list.length === 0) {
+        return;
+      }
 
-    // 업데이트
-    setState(s => ({
-      ...s,
-      ...updatedState,
-      dragging: null,
-    }));
+      const updatedEntities = deleteItem({
+        entities: state.entities,
+        selectedList: state.selected.list,
+      });
+
+      setState(s => ({
+        ...s,
+        entities: updatedEntities,
+        selected: initSelected(),
+        dragging: null,
+      }));
+    } else {
+      // 새로운 state 생성
+      const updatedState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
+
+      // 업데이트
+      setState(s => ({
+        ...s,
+        ...updatedState,
+        dragging: null,
+      }));
+    }
   }, [state, error]);
 
   // 아이템 선택
@@ -303,10 +325,16 @@ const Context = () => {
 
   return (
     <s.ContainerStyle>
-      <div>
-        <button onClick={onClickRemoveColumn}>remove col</button>
-        <button onClick={onClickAddColumn}>add col</button>
-      </div>
+      <s.SettingContainerStyle>
+        <div>
+          <button onClick={onClickRemoveColumn}>열 제거</button>
+          <button onClick={onClickAddColumn}>열 추가</button>
+        </div>
+        <div>
+          <button onClick={onClickAddItem}>아이템 추가</button>
+          <button onClick={onClickDeleteItem}>선택된 아이템 제거</button>
+        </div>
+      </s.SettingContainerStyle>
       <s.ContextContainerStyle>
         <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd} >
           {
@@ -340,12 +368,9 @@ const Context = () => {
               )
             })
           }
+          <Delete key={'delete'} id={'delete'} />
         </DragDropContext>
       </s.ContextContainerStyle>
-      <div>
-        <button onClick={onClickAddItem}>add item</button>
-        <button onClick={onClickDeleteItem}>delete selected item</button>
-      </div>
     </s.ContainerStyle>
   )
 }

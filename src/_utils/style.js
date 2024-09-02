@@ -6,6 +6,10 @@ export const getListStyle = (isDraggingOver) => ({
   padding: `${GRID}px ${GRID}px 0 ${GRID}px`,
 });
 
+export const getDeleteStyle = (isDraggingOver) => ({
+  background: isDraggingOver ? 'red' : '#EEE',
+});
+
 // 아이템 스타일 계산
 export const getItemStyle = (draggableStyle) => ({
   padding: `0 ${GRID * 2}px 0 ${GRID * 2}px`,

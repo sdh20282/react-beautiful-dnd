@@ -11,5 +11,9 @@ export {
 } from './column';
 
 export {
+  Delete
+} from './delete';
+
+export {
   Item
 } from './item';

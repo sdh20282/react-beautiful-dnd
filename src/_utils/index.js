@@ -21,6 +21,7 @@ export {
 
 export {
   getListStyle,
+  getDeleteStyle,
   getItemStyle,
   getBackgroundColor,
   getColor
