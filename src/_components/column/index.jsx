@@ -6,7 +6,7 @@ import { getListStyle } from '@utils';
 
 import * as s from './styles';
 
-const Column = ({ children, id, inValid }) => {
+const _Column = ({ children, id, inValid = false }) => {
   return (
     <Droppable droppableId={id} isDropDisabled={inValid}>
       {(provided, snapshot) => {
@@ -27,4 +27,4 @@ const Column = ({ children, id, inValid }) => {
   )
 }
 
-export { Column };
+export const Column = React.memo(_Column);

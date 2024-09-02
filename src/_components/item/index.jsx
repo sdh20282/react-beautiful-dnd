@@ -1,10 +1,12 @@
+import React from 'react';
+
 import { Draggable } from "react-beautiful-dnd";
 
 import { getItemStyle, checkEventType } from "@utils";
 
 import * as s from './styles';
 
-const Item = ({ item, index, isSelected, isExtra, isError, selectedCount, changeSelect }) => {
+const _Item = ({ item, index, isSelected, isExtra, isError, selectedCount, changeSelect }) => {
   const action = (event) => {
     const type = checkEventType(event);
 
@@ -60,4 +62,4 @@ const Item = ({ item, index, isSelected, isExtra, isError, selectedCount, change
   )
 }
 
-export { Item };
+export const Item = React.memo(_Item);
