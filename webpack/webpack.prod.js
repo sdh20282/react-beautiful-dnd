@@ -50,11 +50,6 @@ module.exports = merge(common, {
       chunks: 'all',
     },
   },
-  resolve: {
-    extensions: [
-      '.js'
-    ]
-  },
   performance: {
     hints: false,
     maxEntrypointSize: 512000,
