@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
-import { getBackgroundColor, getColor } from '@utils';
+import { getBackgroundColor, getColor, getBorder } from '@utils';
 
-export const ItemStyle = styled.div`
+export const ItemStyle = styled.li`
   position: relative;
 
   display: flex;
@@ -11,8 +11,8 @@ export const ItemStyle = styled.div`
   user-select: none;
 
   border-radius: 8px;
-  border: 1px solid #ccc;
-
+  
+  border: ${props => getBorder(props)};
   background-color: ${props => getBackgroundColor(props)};
   color: ${props => getColor(props)};
 
@@ -27,10 +27,10 @@ export const SelectedCount = styled.p`
   top: -5px;
   right: 5px;
 
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 
-  background-color: #ff4d4d;
+  background-color: ${({ theme }) => theme.backgroundColor.cancelHilight};
 
   display: flex;
   align-items: center;

@@ -5,7 +5,9 @@ import * as s from "./styles";
 const Container = () => {
   return (
     <s.ContainerStyle>
-      <s.TitleStyle>React DnD using react-beautiful-dnd</s.TitleStyle>
+      <header>
+        <s.TitleStyle>React DnD using react-beautiful-dnd</s.TitleStyle>
+      </header>
       <Context />
     </s.ContainerStyle>
   )

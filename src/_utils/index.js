@@ -24,7 +24,8 @@ export {
   getDeleteStyle,
   getItemStyle,
   getBackgroundColor,
-  getColor
+  getColor,
+  getBorder
 } from './style';
 
 export {

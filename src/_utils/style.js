@@ -1,13 +1,14 @@
 import { GRID, ITEM_HEIGHT } from '@data';
+import { theme } from '@styles';
 
 // 리스트 스타일 계산
 export const getListStyle = (isDraggingOver) => ({
-  background: isDraggingOver ? 'lightblue' : '#EEE',
+  background: isDraggingOver ? theme.backgroundColor.listHover : theme.backgroundColor.list,
   padding: `${GRID}px ${GRID}px 0 ${GRID}px`,
 });
 
 export const getDeleteStyle = (isDraggingOver) => ({
-  background: isDraggingOver ? 'red' : '#EEE',
+  background: isDraggingOver ? theme.backgroundColor.cancelHilight : theme.backgroundColor.cancel,
 });
 
 // 아이템 스타일 계산
@@ -21,15 +22,15 @@ export const getItemStyle = (draggableStyle) => ({
 // 배경색 계산
 export const getBackgroundColor = ({ $selected, $disabled, $invalid }) => {
   if ($disabled) {
-    return '#352435';
+    return theme.backgroundColor.itemDisabled;
   }
 
   if ($invalid) {
-    return '#ff4d4d';
+    return '#f46b70';
   }
 
   if ($selected) {
-    return '#3689ff';
+    return '#646ef3';
   }
 
   return '#ffffff';
@@ -46,4 +47,12 @@ export const getColor = ({ $selected, $disabled, $invalid }) => {
   }
 
   return '#000000';
+}
+
+export const getBorder = ({ $selected }) => {
+  if ($selected) {
+    return 'none';
+  }
+
+  return '1px solid #cccccc';
 }

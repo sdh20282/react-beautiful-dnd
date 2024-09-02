@@ -1,6 +1,31 @@
 import styled from "styled-components";
 
 export const DeleteStyle = styled.div`
-  width: 100px;
-  height: 100px;
+  position: relative;
+
+  overflow: hidden;
+
+  width: 320px;
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  transition: all 600ms cubic-bezier(0.13, 0.67, 0.01, 0.94);
+`;
+
+export const TextStyle = styled.p`
+  position: absolute;
+
+  user-select: none;
+
+  top: 50%;
+  left: 50%;
+  
+  color: white;
+
+  transform: translate(-50%, -50%);
 `;

@@ -2,11 +2,13 @@ import { useState, useCallback, useEffect, useRef } from "react";
 
 import { DragDropContext } from "react-beautiful-dnd";
 
-import { Column, Item, Delete } from "@components";
+import { Column, Item, Delete, Setting } from "@components";
 import { getEntities, initSelected, initError, updateSelected, reorder, windowEventHandler, checkColumnException, checkEvenItemException, addColumn, removeColumn, addItem, deleteItem } from "@utils";
 import { COLUMN_COUNT, ITEM_COUNT, ITEM_HEIGHT } from "@data";
 
 import * as s from './styles';
+
+const validateY = ITEM_HEIGHT / 3;
 
 const Context = () => {
   // 기본 정보
@@ -29,6 +31,9 @@ const Context = () => {
   const animationFrame = useRef(null);
   const mouseY = useRef(0);
 
+  // 설정 타입
+  const [settingType, setSettingType] = useState('');
+
   // 강제 리렌더링을 위한 state
   const [_, setRender] = useState(false);
 
@@ -43,12 +48,10 @@ const Context = () => {
       ...s,
       selected: initSelected(),
     }));
-  }, []);
+  }, [state]);
 
   // 컬럼 추가를 위한 함수
-  const onClickAddColumn = useCallback((event) => {
-    event.preventDefault();
-
+  const onClickAddColumn = useCallback(() => {
     const updatedColumn = addColumn({ entities: state.entities, number: info.columns });
 
     setState(s => ({
@@ -60,12 +63,10 @@ const Context = () => {
       ...s,
       columns: s.columns + 1
     }));
-  }, [info]);
+  }, [info, state]);
 
   // 컬럼 삭제를 위한 함수
-  const onClickRemoveColumn = useCallback((event) => {
-    event.preventDefault();
-
+  const onClickRemoveColumn = useCallback(() => {
     const {
       updatedEntities,
       updatedSelected
@@ -86,10 +87,10 @@ const Context = () => {
       ...s,
       columns: s.columns - 1
     }));
-  }, [state, info]);
+  }, [info, state]);
 
   // 아이템 추가를 위한 함수
-  const onClickAddItem = () => {
+  const onClickAddItem = useCallback(() => {
     const updatedEntities = addItem({
       entities: state.entities,
       number: info.items,
@@ -104,10 +105,10 @@ const Context = () => {
       ...s,
       items: s.items + 1,
     }))
-  }
+  }, [info, state]);
 
   // 아이템 삭제를 위한 함수
-  const onClickDeleteItem = () => {
+  const onClickDeleteItem = useCallback(() => {
     if (state.selected.list.length === 0) {
       return;
     }
@@ -123,7 +124,7 @@ const Context = () => {
       selected: initSelected(),
       dragging: null,
     }));
-  }
+  }, [info, state]);
 
   // 드래그 시작 시
   const onDragStart = useCallback((start) => {
@@ -153,12 +154,16 @@ const Context = () => {
   }, [state]);
 
   // 업데이트 시
-  const onDragUpdate = (update) => {
+  const onDragUpdate = useCallback((update) => {
     if (!update.destination) {
       return;
     }
 
     if (update.destination.droppableId === 'delete') {
+      error.current = initError();
+
+      rerender();
+
       return;
     }
 
@@ -205,7 +210,7 @@ const Context = () => {
 
       rerender();
     }
-  }
+  }, [state, error]);
 
   // 드래그 종료 시
   const onDragEnd = useCallback((end) => {
@@ -223,11 +228,13 @@ const Context = () => {
       return;
     }
 
+    // delte 영역으로 드래그 시
     if (end.destination.droppableId === 'delete') {
       if (state.selected.list.length === 0) {
         return;
       }
 
+      // 아이템 제거
       const updatedEntities = deleteItem({
         entities: state.entities,
         selectedList: state.selected.list,
@@ -239,6 +246,7 @@ const Context = () => {
         selected: initSelected(),
         dragging: null,
       }));
+      // 컬럼 영역으로 드래그 시
     } else {
       // 새로운 state 생성
       const updatedState = reorder(state.entities, state.selected, state.dragging, end.source, end.destination);
@@ -295,7 +303,7 @@ const Context = () => {
         return;
       }
 
-      if (Math.abs(mouseY.current - event.clientY) < ITEM_HEIGHT / 2) {
+      if (Math.abs(mouseY.current - event.clientY) < validateY) {
         return;
       }
 
@@ -312,62 +320,84 @@ const Context = () => {
       window.addEventListener(e, eventHandlers[e]);
     });
 
-    window.addEventListener('mousemove', revalidateError);
+    // window.addEventListener('mousemove', revalidateError);
 
     return () => {
       windowEvents.forEach(e => {
         window.removeEventListener(e, eventHandlers[e]);
       });
 
-      window.removeEventListener('mousemove', revalidateError);
+      // window.removeEventListener('mousemove', revalidateError);
     };
   }, []);
 
   return (
     <s.ContainerStyle>
       <s.SettingContainerStyle>
-        <div>
-          <button onClick={onClickRemoveColumn}>열 제거</button>
-          <button onClick={onClickAddColumn}>열 추가</button>
-        </div>
-        <div>
-          <button onClick={onClickAddItem}>아이템 추가</button>
-          <button onClick={onClickDeleteItem}>선택된 아이템 제거</button>
-        </div>
+        <header>
+          <h2>setting section</h2>
+        </header>
+        <Setting
+          description='columns'
+          addTitle='Add Column'
+          removeTitle='Remove Column'
+          addCallback={onClickAddColumn}
+          removeCallback={onClickRemoveColumn}
+          type='column'
+          settingType={settingType}
+          setType={setSettingType}
+        />
+        <Setting
+          description='items'
+          addTitle='Add Item'
+          removeTitle='Remove Selected Items'
+          addCallback={onClickAddItem}
+          removeCallback={onClickDeleteItem}
+          type='item'
+          settingType={settingType}
+          setType={setSettingType}
+          disableRemove={state.selected.list.length === 0}
+        />
       </s.SettingContainerStyle>
       <s.ContextContainerStyle>
+        <header>
+          <h2>drag & drop section</h2>
+        </header>
         <DragDropContext onDragStart={onDragStart} onDragUpdate={onDragUpdate} onDragEnd={onDragEnd} >
-          {
-            state.entities.columns.map((column) => {
-              const inValid = error.current.error && error.current.target === column;
+          <s.ColumnListStyle>
+            {
+              state.entities.columns.map((column) => {
+                // const inValid = error.current.error && error.current.target === column;
+                const inValid = false;
 
-              return (
-                <Column key={column} id={column} inValid={inValid}>
-                  {
-                    state.entities.columnItems[column].map((item, index) => {
-                      const curItem = state.entities.items[item];
-                      const isSelected = state.selected.ordered.includes(curItem.id);
-                      const isExtra = state.dragging && isSelected && state.dragging !== curItem.id;
-                      const isError = state.dragging && error.current.error && state.dragging === curItem.id;
+                return (
+                  <Column key={column} id={column} inValid={inValid}>
+                    {
+                      state.entities.columnItems[column].map((item, index) => {
+                        const curItem = state.entities.items[item];
+                        const isSelected = state.selected.ordered.includes(curItem.id);
+                        const isExtra = state.dragging && isSelected && state.dragging !== curItem.id;
+                        const isError = state.dragging && error.current.error && state.dragging === curItem.id;
 
-                      return (
-                        <Item
-                          key={curItem.id}
-                          item={curItem}
-                          index={index}
-                          isSelected={isSelected}
-                          isExtra={isExtra}
-                          isError={isError}
-                          selectedCount={state.selected.ordered.length}
-                          changeSelect={changeSelect}
-                        />
-                      )
-                    })
-                  }
-                </Column>
-              )
-            })
-          }
+                        return (
+                          <Item
+                            key={curItem.id}
+                            item={curItem}
+                            index={index}
+                            isSelected={isSelected}
+                            isExtra={isExtra}
+                            isError={isError}
+                            selectedCount={state.selected.ordered.length}
+                            changeSelect={changeSelect}
+                          />
+                        )
+                      })
+                    }
+                  </Column>
+                )
+              })
+            }
+          </s.ColumnListStyle>
           <Delete key={'delete'} id={'delete'} />
         </DragDropContext>
       </s.ContextContainerStyle>

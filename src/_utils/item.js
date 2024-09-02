@@ -242,6 +242,7 @@ export const reorder = (entities, selected, dragging, source, destination) => {
   };
 };
 
+// 컬럼 추가
 export const addColumn = ({ entities, number }) => {
   const updatedEntities = entities;
   const newColumn = `column-${number + 1}`;
@@ -252,15 +253,18 @@ export const addColumn = ({ entities, number }) => {
   return updatedEntities;
 };
 
+// 컬럼 삭제
 export const removeColumn = ({ entities, selected, lastColumn, prevColumn }) => {
   const updatedEntities = entities;
   const updatedSelected = selected;
 
+  // 삭제될 컬럼의 아이템을 이전 컬럼으로 이동
   if (updatedEntities.columnItems[lastColumn].length > 0) {
     updatedEntities.columnItems[prevColumn] = [...updatedEntities.columnItems[prevColumn], ...updatedEntities.columnItems[lastColumn]];
 
     const targetIndex = updatedSelected.columns.indexOf(lastColumn);
 
+    // selected 상태 업데이트
     updatedSelected.columns.splice(targetIndex, 1);
     updatedSelected.columns = Array.from(new Set([...updatedSelected.columns, prevColumn]));
   }
@@ -274,6 +278,7 @@ export const removeColumn = ({ entities, selected, lastColumn, prevColumn }) => 
   }
 }
 
+// 아이템 추가
 export const addItem = ({ entities, number }) => {
   const updatedEntities = entities;
 
@@ -287,10 +292,12 @@ export const addItem = ({ entities, number }) => {
   return updatedEntities;
 }
 
+// 아이템 제거
 export const deleteItem = ({ entities, selectedList }) => {
   const updatedEntities = entities;
 
   for (const selectedItem of selectedList) {
+    // 컬럼에서 아이템 제거
     for (const columns of entities.columns) {
       const targetColumnItems = entities.columnItems[columns];
 
@@ -298,9 +305,12 @@ export const deleteItem = ({ entities, selectedList }) => {
         const index = targetColumnItems.indexOf(selectedItem);
 
         targetColumnItems.splice(index, 1);
+
+        break;
       }
     }
 
+    // 아이템 리스트에서 아이템 제거
     delete updatedEntities.items[selectedItem];
   }
 

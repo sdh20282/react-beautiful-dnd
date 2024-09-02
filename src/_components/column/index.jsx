@@ -16,7 +16,9 @@ const Column = ({ children, id, inValid }) => {
             ref={provided.innerRef}
             style={getListStyle(snapshot.isDraggingOver)}
           >
-            {children}
+            <ul>
+              {children}
+            </ul>
             {provided.placeholder}
           </s.ListStyle>
         )

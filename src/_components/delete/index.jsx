@@ -6,7 +6,7 @@ import { getDeleteStyle } from '@utils';
 
 import * as s from './styles';
 
-const Delete = ({ children, id }) => {
+const Delete = ({ id }) => {
   return (
     <Droppable droppableId={id}>
       {(provided, snapshot) => {
@@ -16,7 +16,7 @@ const Delete = ({ children, id }) => {
             ref={provided.innerRef}
             style={getDeleteStyle(snapshot.isDraggingOver)}
           >
-            {children}
+            <s.TextStyle>drop items to remove</s.TextStyle>
             {provided.placeholder}
           </s.DeleteStyle>
         )

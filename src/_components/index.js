@@ -17,3 +17,7 @@ export {
 export {
   Item
 } from './item';
+
+export {
+  Setting
+} from './setting';

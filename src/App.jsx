@@ -1,12 +1,14 @@
+import { ThemeProvider } from 'styled-components';
+
 import { Container } from '@components';
-import { GlobalStyle } from '@styles';
+import { GlobalStyle, theme } from '@styles';
 
 const App = () => {
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <GlobalStyle />
       <Container />
-    </>
+    </ThemeProvider>
   );
 };
 
