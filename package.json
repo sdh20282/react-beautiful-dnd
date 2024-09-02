@@ -1,7 +1,7 @@
 {
-  "name": "mememtoai_front_assignment",
+  "name": "react_dnd_using_react_beautiful_dnd",
   "version": "1.0.0",
-  "description": "MementoAI Front Assignment",
+  "description": "React DnD using react-beautiful-dnd",
   "author": "sdh20282",
   "main": "index.js",
   "keywords": [
