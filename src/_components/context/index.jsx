@@ -195,7 +195,7 @@ const Context = () => {
     })) {
       error.current = {
         error: true,
-        message: '짝수 아이템은 다른 짝수 아이템 앞으로 올 수 없습니다.',
+        message: '짝수 아이템은 다른 짝수 아이템 바로 앞으로 올 수 없습니다.',
         target: update.destination.droppableId,
         type: 'item',
       };
@@ -402,6 +402,10 @@ const Context = () => {
           </s.ColumnListStyle>
           <Delete key={'delete'} id={'delete'} />
         </DragDropContext>
+        {
+          error.current.message &&
+          <s.ErrorMessageStyle>{error.current.message}</s.ErrorMessageStyle>
+        }
       </s.ContextContainerStyle>
     </s.ContainerStyle>
   )

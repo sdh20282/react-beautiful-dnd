@@ -20,6 +20,8 @@ export const SettingContainerStyle = styled.section`
 `;
 
 export const ContextContainerStyle = styled.section`
+  position: relative;
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,3 +37,13 @@ export const ColumnListStyle = styled.div`
   
   gap: 10px;
 `
+
+export const ErrorMessageStyle = styled.p`
+  position: absolute;
+
+  bottom: 140px;
+  left: 0;
+
+  font-size: 14px;
+  color: ${({ theme }) => theme.backgroundColor.cancel};
+`;

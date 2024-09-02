@@ -5,7 +5,7 @@ export const DeleteStyle = styled.div`
 
   overflow: hidden;
 
-  width: 320px;
+  width: 280px;
   height: 80px;
 
   display: flex;
@@ -21,6 +21,7 @@ export const TextStyle = styled.p`
   position: absolute;
 
   user-select: none;
+  white-space: nowrap;
 
   top: 50%;
   left: 50%;
