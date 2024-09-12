@@ -33,6 +33,7 @@ export const getEntities = (columnCount, itemCount) => {
   const columnItems = columns.reduce((prev, cur, idx) => {
     const current = {
       ...prev,
+      // 왜 for...in이 아니라 Object.keys 메서드를 사용했는가? -> for...in 메서드는 상속받은 프로퍼티 중에서 열거가 가능한 프로퍼티 또한 열거하기 때문에 권장하지 않는 것으로 알고 있습니다.
       [cur]: idx === 0 ? Object.keys(items).map(item => item) : [],
     };
 
