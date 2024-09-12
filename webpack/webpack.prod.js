@@ -76,6 +76,7 @@ module.exports = merge(common, {
     ]
   },
   optimization: {
+    // Chunk 파일을 어떻게 분리할지 Webpack에서 설정을 해주지 않으면, 기본 설정인 페이지 별로 Chunk 파일이 분리 ->  페이지에서 동일하게 사용되는 코드가 중복
     // 동기, 비동기, 정적으로 import된 모든 모듈에 대해 최적화 진행
     splitChunks: {
       chunks: 'all',
