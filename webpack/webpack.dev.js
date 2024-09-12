@@ -53,6 +53,7 @@ module.exports = merge(common, {
     ]
   },
   optimization: {
+    // 런타임 청크 분리용
     runtimeChunk: {
       name: entrypoint => `runtime-${entrypoint.name}`,
     },

@@ -66,7 +66,7 @@ module.exports = merge(common, {
                 minify: true,
                 // 템플릿 리터럴 문법 트랜스파일
                 transpileTemplateLiterals: true,
-                // 스타일드 컴포넌트에서 죽은 코드 제거
+                // 스타일드 컴포넌트에서 사용하지 않는 css 코드 제거
                 pure: true,
               },
             ],
@@ -76,6 +76,7 @@ module.exports = merge(common, {
     ]
   },
   optimization: {
+    // 동기, 비동기, 정적으로 import된 모든 모듈에 대해 최적화 진행
     splitChunks: {
       chunks: 'all',
     },
